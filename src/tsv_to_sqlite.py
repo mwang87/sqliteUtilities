@@ -27,6 +27,7 @@ def create_sqlite_file(input_tsv_filename, output_sqlite_filename):
     for header in headers:
         if header in sql_reserved_words:
             continue
+        #We should do some inference on the types, we probably should only support floats, strings, and ints
         create_table_sql += header.replace(":", "_").replace("-", "_").replace("#", "_").replace("(", "_").replace(")", "_") + " " + "varchar(255)" + ", "
 
     create_table_sql = create_table_sql[:-2]
