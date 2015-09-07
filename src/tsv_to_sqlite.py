@@ -21,7 +21,9 @@ def create_sqlite_file(input_tsv_filename, output_sqlite_filename):
     headers = table_data.keys()
 
     #Writing the Schema
-    create_table_sql = "CREATE TABLE MyData("
+    create_table_sql = "PRAGMA foreign_keys=OFF;\n"
+    create_table_sql += "BEGIN TRANSACTION;\n"
+    create_table_sql += "CREATE TABLE MyData("
 
 
     for header in headers:
@@ -36,26 +38,38 @@ def create_sqlite_file(input_tsv_filename, output_sqlite_filename):
     temp_sql_populate_file.write(create_table_sql)
 
     #Writing the Data
-    batch_insert_size = 500
     for i in range(rows):
-        row_insert_statement = ""
+        row_insert_statement = "INSERT INTO MyData VALUES("
         for header in headers:
             if header in sql_reserved_words:
                 continue
             row_insert_statement += "'" + table_data[header][i] + "',"
         row_insert_statement = row_insert_statement[:-1]
-        row_insert_statement += ""
-
-        if i % batch_insert_size == 0:
-            insert_statement = "INSERT INTO MyData SELECT "
-            if i != 0:
-                temp_sql_populate_file.write(";\n")
-            temp_sql_populate_file.write(insert_statement)
-
-        if i < (rows - 1) and ( (i + 1) % batch_insert_size != 0):
-            row_insert_statement += " UNION ALL SELECT "
+        row_insert_statement += ");\n"
         temp_sql_populate_file.write(row_insert_statement)
-    temp_sql_populate_file.write(";\n")
+
+    temp_sql_populate_file.write("COMMIT;\n")
+
+    # batch_insert_size = 500
+    # for i in range(rows):
+    #     row_insert_statement = ""
+    #     for header in headers:
+    #         if header in sql_reserved_words:
+    #             continue
+    #         row_insert_statement += "'" + table_data[header][i] + "',"
+    #     row_insert_statement = row_insert_statement[:-1]
+    #     row_insert_statement += ""
+    #
+    #     if i % batch_insert_size == 0:
+    #         insert_statement = "INSERT INTO MyData SELECT "
+    #         if i != 0:
+    #             temp_sql_populate_file.write(";\n")
+    #         temp_sql_populate_file.write(insert_statement)
+    #
+    #     if i < (rows - 1) and ( (i + 1) % batch_insert_size != 0):
+    #         row_insert_statement += " UNION ALL SELECT "
+    #     temp_sql_populate_file.write(row_insert_statement)
+    # temp_sql_populate_file.write(";\n")
 
     temp_sql_populate_file.close()
 
