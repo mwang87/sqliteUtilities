@@ -1,1 +1,7 @@
 SELECT *, MIN(DeNovoScore), MAX(DeNovoScore) FROM MyData GROUP BY Peptide;
+
+#Grouping by Peptide and then showing also the min and max scores for each PSM.
+#Can make queries faster if we create this as separate table and index on things we want to sort on.
+SELECT *, MIN(SpecProb), MAX(SpecProb), COUNT(*) as psm_count FROM MyData GROUP BY Peptide ORDER BY Peptide;
+CREATE INDEX `Score_index` ON `GroupByPeptide` (`MIN(SpecProb)` );
+CREATE INDEX `psmcount_index` ON `GroupByPeptide` (`psm_count` );
